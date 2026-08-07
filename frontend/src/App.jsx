@@ -7,6 +7,7 @@ import Categories from "./pages/Categories";
 import PersonalStylist from "./pages/PersonalStylist";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
+import Auth from "./pages/Auth";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
   element={<Wishlist />}
 />
 <Route path="/account" element={<Profile />} />
+<Route path="/auth" element={<Auth />} />
     </Routes>
   );
 }
