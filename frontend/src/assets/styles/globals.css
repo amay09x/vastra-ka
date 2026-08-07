@@ -1,0 +1,19 @@
+@keyframes cursorBlink {
+
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  46%,
+  100% {
+    opacity: 0;
+  }
+
+}
+
+.cursor-blink {
+
+  animation: cursorBlink .9s infinite;
+
+}
