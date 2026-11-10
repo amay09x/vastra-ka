@@ -1,34 +1,47 @@
-import BrandDivider from "./BrandDivider";
+import { motion } from "framer-motion";
 
 function BrandText() {
   return (
-    <div className="flex flex-col items-center">
+    <div className="mt-10">
 
-      <h1
+      <motion.h1
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.5, duration: 0.8 }}
         className="
-          mt-4
-          brand-font
-          text-6xl lg:text-7xl
-          tracking-[0.35em]
-          text-[var(--gold)]
+          text-7xl
+          font-bold
+          tracking-[14px]
+          text-[#D4AF37]
         "
       >
         VASTRA
-      </h1>
+      </motion.h1>
 
-      <BrandDivider />
-
-      <p
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.2 }}
         className="
-          mt-4
-          uppercase
-          tracking-[0.4em]
-          text-sm
-          text-[var(--text-secondary)]
+          mt-6
+          text-xl
+          text-white/80
         "
       >
-        Style Curated for You
-      </p>
+        Style Curated For You
+      </motion.p>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.8 }}
+        className="
+          mt-2
+          text-[#D4AF37]
+        "
+      >
+        Luxury Meets Intelligence
+      </motion.p>
 
     </div>
   );

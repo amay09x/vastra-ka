@@ -1,72 +1,161 @@
 import os
 
 from dotenv import load_dotenv
-from serpapi import GoogleSearch
 
-from app.models.product_model import Product
+from app.services.shopping.brightdata_provider import (
+    BrightDataProvider,
+)
+from app.services.shopping.serper_provider import (
+    SerperProvider,
+)
+
 
 load_dotenv()
 
 
 class SearchService:
 
-    def search_products(self, query):
+    MAX_RESULTS = 16
 
-        params = {
-            "engine": "google_shopping",
-            "q": query,
-            "gl": "in",
-            "hl": "en",
-            "api_key": os.getenv("SERPAPI_KEY")
-        }
+    def __init__(self):
 
-        search = GoogleSearch(params)
+        provider_name = (
+            os.getenv(
+                "SHOPPING_PROVIDER",
+                "brightdata",
+            )
+            .lower()
+            .strip()
+        )
 
-        results = search.get_dict()
+        # =====================================================
+        # PRIMARY PROVIDER
+        # =====================================================
 
-        # Print only the first product once (for debugging)
-        first_item = results.get("shopping_results", [])
+        if provider_name == "brightdata":
 
-        if first_item:
-            print("\n========== RAW SHOPPING RESULT ==========\n")
-            print(first_item[0])
-            print("\n=========================================\n")
+            self.provider = BrightDataProvider()
 
-        products = []
+        # =====================================================
+        # OPTIONAL FUTURE PROVIDER
+        # =====================================================
 
-        for item in results.get("shopping_results", [])[:10]:
+        elif provider_name == "serper":
 
-            product = Product(
+            self.provider = SerperProvider()
 
-                product_id=item.get("product_id"),
-                immersive_api=item.get("serpapi_immersive_product_api"),
+        else:
 
-                title=item.get("title"),
-
-                thumbnail=item.get("thumbnail"),
-
-                images=[],
-
-                ai_pick=False,
-
-                rank=None,
-
-                price=item.get("price"),
-
-                rating=item.get("rating"),
-
-                review_count=item.get("reviews"),
-
-                customer_reviews=[],
-
-                buy_now=None,
-
-                available_on=[],
-
-                ai_review=None
-
+            raise ValueError(
+                "Unsupported SHOPPING_PROVIDER: "
+                f"{provider_name}"
             )
 
-            products.append(product)
+        self.provider_name = provider_name
+
+        print(
+            f"🛒 Shopping Provider: "
+            f"{provider_name}"
+        )
+
+    # =========================================================
+    # SEARCH PRODUCTS
+    # =========================================================
+
+    def search_products(
+        self,
+        query,
+    ):
+
+        if not query:
+            print(
+                "⚠️ SearchService received "
+                "an empty query."
+            )
+            return []
+
+        query = str(query).strip()
+
+        if not query:
+            return []
+
+        print(
+            f"\n🔎 SearchService Query:"
+            f"\n{query}"
+        )
+
+        try:
+
+            products = (
+                self.provider.search_products(
+                    query
+                )
+            )
+
+        except Exception as exc:
+
+            print(
+                "❌ Shopping provider error: "
+                f"{type(exc).__name__}: {exc}"
+            )
+
+            return []
+
+        if not products:
+
+            print(
+                "⚠️ SearchService found "
+                "no products."
+            )
+
+            return []
+
+        # Keep Vastra's normal 16-product
+        # contract.
+
+        products = products[
+            :self.MAX_RESULTS
+        ]
+
+        print(
+            f"✅ SearchService received "
+            f"{len(products)} products"
+        )
 
         return products
+
+    # =========================================================
+    # PRODUCT DETAILS
+    # =========================================================
+
+    def get_product_details(
+        self,
+        product,
+    ):
+
+        if not isinstance(product, dict):
+            return {}
+
+        # For now the initial Bright Data
+        # shopping result is already normalized.
+        #
+        # The Google Shopping link is stored
+        # in immersive_api.
+        #
+        # Actual retailer URL resolution can
+        # happen separately when required.
+
+        existing_link = product.get(
+            "product_link"
+        )
+
+        if existing_link:
+            return {
+                "product_link": existing_link,
+                "customer_reviews": [],
+            }
+
+        return {
+            "product_link": None,
+            "customer_reviews": [],
+        }

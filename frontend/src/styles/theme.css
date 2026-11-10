@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+
 :root {
   --bg: #050505;
 
@@ -14,10 +16,13 @@
   --white: #FFFFFF;
 
   --muted: #A6A6A6;
+
   --surface: #0E0E0E;
+
   --surface-2: #171717;
 
   --text: var(--white);
+
   --text-secondary: var(--muted);
 
   --radius: 18px;
@@ -25,10 +30,27 @@
   --transition: 0.35s ease;
 }
 
-.brand-font{
-    font-family:'Cormorant Garamond', serif;
+
+/* ================================
+   VASTRA TYPOGRAPHY
+================================ */
+
+.brand-font {
+  font-family: "Cormorant Garamond", serif;
 }
 
-.body-font{
-    font-family:'Inter', sans-serif;
+.body-font {
+  font-family: "Manrope", sans-serif;
+}
+
+.display-font {
+  font-family: "Manrope", sans-serif;
+}
+
+.serif-font {
+  font-family: "Cormorant Garamond", serif;
+}
+
+.mono-font {
+  font-family: "DM Mono", monospace;
 }

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
   Sparkles,
   Menu,
   X,
+  ChevronDown,
 } from "lucide-react";
 
 import { NAV_LINKS } from "../../constants/navigation";
@@ -16,6 +17,24 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
+  const profileRef = useRef(null);
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      profileRef.current &&
+      !profileRef.current.contains(event.target)
+    ) {
+      setProfileOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
   const profileMenu = [
     {
       title: "Wishlist",
@@ -26,9 +45,9 @@ function Navbar() {
       path: "/stylist",
     },
     {
-  title: "Account Settings",
-  path: "/account",
-},
+      title: "Account Settings",
+      path: "/account",
+    },
     {
       title: "Logout",
       path: null,
@@ -46,210 +65,301 @@ function Navbar() {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-[#050505] border-b border-[#1a1a1a]">
+<header className="fixed top-3 left-0 right-0 z-50 px-4 md:px-6">      
+      {/* GLASS NAVBAR */}
+      <div
+  className="
+    w-full
+    h-[64px]
+    rounded-[18px]
+    border
+    border-white/[0.10]
+    bg-[#080808]/65
+    backdrop-blur-2xl
+    shadow-[0_8px_35px_rgba(0,0,0,0.28)]
+    flex
+    items-center
+    px-5
+    md:px-6
+    lg:px-7
+  "
+>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        {/* ================= LOGO ================= */}
 
-        <div className="h-16 flex items-center justify-between">
+        <Link
+          to="/"
+          className="
+            flex
+            items-center
+            shrink-0
+            group
+          "
+        >
+          <Logo />
+        </Link>
 
-          {/* Logo */}
 
-          <div className="cursor-pointer">
-            <Logo />
-          </div>
+        {/* ================= DESKTOP RIGHT SIDE ================= */}
 
-          {/* Desktop Navigation */}
+        <div
+          className="
+            hidden
+            lg:flex
+            items-center
+            ml-auto
+            gap-6
+          "
+        >
 
-          <nav className="hidden lg:flex items-center gap-10">
+          {/* NAVIGATION */}
+
+          <nav className="flex items-center gap-6">
 
             {NAV_LINKS.map((item) => (
-
               <Link
                 key={item.title}
                 to={item.path}
                 className="
-                  text-[#cfcfcf]
-                  hover:text-[#D4AF37]
-                  transition-all
-                  duration-300
                   relative
+                  text-[14px]
+                  text-white/65
+                  hover:text-white
+                  transition-colors
+                  duration-300
+                  whitespace-nowrap
                   group
                 "
               >
-
                 {item.title}
 
                 <span
                   className="
                     absolute
-                    left-0
                     -bottom-2
-                    h-[2px]
+                    left-1/2
+                    -translate-x-1/2
                     w-0
+                    h-[1px]
                     bg-[#D4AF37]
                     group-hover:w-full
                     transition-all
+                    duration-300
                   "
                 />
-
               </Link>
-
             ))}
 
           </nav>
 
-          {/* Right Side */}
 
-          <div className="hidden lg:flex items-center gap-5">
+          {/* ASK VASTRA */}
+
+          <button
+            onClick={() => navigate("/stylist")}
+            className="
+              flex
+              items-center
+              gap-2
+              text-[13px]
+              text-[#D4AF37]
+              whitespace-nowrap
+              hover:text-white
+              transition-colors
+            "
+          >
+            <Sparkles size={15} />
+            <span>ASK VASTRA</span>
+          </button>
+
+
+          {/* NOTIFICATION */}
+
+          <button
+            className="
+              text-white/60
+              hover:text-[#D4AF37]
+              transition-colors
+            "
+          >
+            <Bell size={18} strokeWidth={1.6} />
+          </button>
+
+
+          {/* PROFILE */}
+
+          <div
+  ref={profileRef}
+  className="relative"
+>
 
             <button
+              onClick={() => setProfileOpen(!profileOpen)}
               className="
                 flex
                 items-center
                 gap-2
-                px-5
-                py-2.5
-                rounded-full
-                bg-[#D4AF37]
-                text-black
-                font-medium
-                hover:scale-105
-                transition
+                group
               "
             >
 
-              <Sparkles size={18} />
-
-              Ask AI
-
-            </button>
-
-            <Bell
-              size={21}
-              className="cursor-pointer hover:text-[#D4AF37] transition"
-            />
-
-            <div className="relative">
-
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
+              <div
                 className="
-                  w-10
-                  h-10
+                  w-8
+                  h-8
                   rounded-full
-                  bg-[#D4AF37]
-                  text-black
-                  font-semibold
+                  border
+                  border-white/15
+                  bg-white/[0.03]
                   flex
                   items-center
                   justify-center
-                  hover:scale-105
+                  text-sm
+                  text-white
+                  group-hover:border-[#D4AF37]/60
                   transition
                 "
               >
-
                 K
+              </div>
 
-              </button>
+              <ChevronDown
+                size={14}
+                className="
+                  text-white/40
+                  group-hover:text-white
+                  transition
+                "
+              />
 
-              {profileOpen && (
+            </button>
 
-                <div
-                  className="
-                    absolute
-                    right-0
-                    mt-3
-                    w-64
-                    bg-[#111]
-                    border
-                    border-[#222]
-                    rounded-2xl
-                    overflow-hidden
-                    shadow-2xl
-                    z-50
-                  "
-                >
 
-                  <div className="p-6 border-b border-[#222]">
+            {/* PROFILE DROPDOWN */}
 
-                    <h3 className="font-semibold">
+            {profileOpen && (
+              <div
+                className="
+                  absolute
+                  right-0
+                  top-14
+                  w-60
+                  rounded-2xl
+                  border
+                  border-white/10
+                  bg-[#0c0c0c]/95
+                  backdrop-blur-xl
+                  shadow-2xl
+                  overflow-hidden
+                "
+              >
 
-                      Kumar Shailendra
+                <div className="px-5 py-4 border-b border-white/10">
 
-                    </h3>
+                  <p className="text-sm font-medium text-white">
+                    Kumar Shailendra
+                  </p>
 
-                  </div>
-
-                  {profileMenu.map((item) => (
-
-                    <button
-                      key={item.title}
-                      onClick={() => handleProfileClick(item)}
-                      className="
-                        w-full
-                        text-left
-                        px-6
-                        py-4
-                        hover:bg-[#181818]
-                        transition
-                      "
-                    >
-
-                      {item.title}
-
-                    </button>
-
-                  ))}
+                  <p className="text-xs text-white/40 mt-1">
+                    VASTRA member
+                  </p>
 
                 </div>
 
-              )}
+                {profileMenu.map((item) => (
+                  <button
+                    key={item.title}
+                    onClick={() => handleProfileClick(item)}
+                    className="
+                      w-full
+                      text-left
+                      px-5
+                      py-3
+                      text-sm
+                      text-white/70
+                      hover:text-white
+                      hover:bg-white/[0.04]
+                      transition
+                    "
+                  >
+                    {item.title}
+                  </button>
+                ))}
 
-            </div>
+              </div>
+            )}
 
           </div>
 
-          {/* Mobile Menu Button */}
-
-          <button
-            className="lg:hidden"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-
-            {menuOpen ? <X /> : <Menu />}
-
-          </button>
-
         </div>
+
+
+        {/* ================= MOBILE ================= */}
+
+        <button
+          className="
+            lg:hidden
+            ml-auto
+            text-white
+          "
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
 
       </div>
 
-      {/* Mobile Menu */}
+
+      {/* ================= MOBILE MENU ================= */}
 
       {menuOpen && (
+        <div
+          className="
+            lg:hidden
+            mt-2
+            rounded-2xl
+            border
+            border-white/10
+            bg-[#090909]/95
+            backdrop-blur-xl
+            p-6
+          "
+        >
 
-        <div className="lg:hidden bg-[#090909] border-t border-[#1f1f1f]">
-
-          <div className="flex flex-col gap-5 py-6 px-8">
+          <div className="flex flex-col gap-5">
 
             {NAV_LINKS.map((item) => (
-
               <Link
                 key={item.title}
                 to={item.path}
                 onClick={() => setMenuOpen(false)}
+                className="
+                  text-white/70
+                  hover:text-[#D4AF37]
+                  transition
+                "
               >
-
                 {item.title}
-
               </Link>
-
             ))}
+
+            <button
+              onClick={() => navigate("/stylist")}
+              className="
+                flex
+                items-center
+                gap-2
+                text-[#D4AF37]
+                pt-2
+              "
+            >
+              <Sparkles size={16} />
+              ASK VASTRA
+            </button>
 
           </div>
 
         </div>
-
       )}
 
     </header>

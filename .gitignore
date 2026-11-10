@@ -141,3 +141,16 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# VS Code settings
+.vscode/
+
+# Temporary API test responses
+serper_resolved_products.json
+serper_response.json
