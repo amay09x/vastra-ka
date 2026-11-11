@@ -3,6 +3,7 @@ import {
   Check,
   ExternalLink,
   Loader2,
+  MessageSquare,
   Sparkles,
   Star,
   TrendingUp,
@@ -10,12 +11,30 @@ import {
 } from "lucide-react";
 
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const API_URL =
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
   "http://127.0.0.1:8000";
+
+// ── Review skeleton card ────────────────────────────────────────────────────
+function ReviewSkeleton() {
+  return (
+    <div className="rounded-2xl border border-white/[0.05] bg-[#181818] p-5 animate-pulse">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-3 w-16 rounded-full bg-white/[0.07]" />
+        <div className="h-3 w-10 rounded-full bg-white/[0.05]" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-3 w-full rounded-full bg-white/[0.06]" />
+        <div className="h-3 w-5/6 rounded-full bg-white/[0.05]" />
+        <div className="h-3 w-4/6 rounded-full bg-white/[0.04]" />
+      </div>
+      <div className="mt-4 h-2 w-20 rounded-full bg-white/[0.04]" />
+    </div>
+  );
+}
 
 function ProductDetails() {
   const navigate = useNavigate();
@@ -25,9 +44,19 @@ function ProductDetails() {
   const initialProduct = location.state?.product || null;
   const userRequest = location.state?.userRequest || "";
 
+  // ── Product-details state (POST /product-details) ────────────────────────
   const [product, setProduct] = useState(initialProduct);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // ── Reviews state (GET /product-reviews) — completely independent ─────────
+  const [oxylabsReviews, setOxylabsReviews]           = useState([]);
+  const [reviewsLoading, setReviewsLoading]           = useState(false);
+  const [reviewsError, setReviewsError]               = useState("");
+  const [reviewsFetched, setReviewsFetched]           = useState(false);
+
+  // Ref to track the product_link once it arrives from the POST response
+  const productLinkRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,6 +165,8 @@ function ProductDetails() {
 
         if (!cancelled && data?.product) {
           setProduct(data.product);
+          // Expose the link so the reviews useEffect can fire
+          productLinkRef.current = data.product.product_link || null;
         }
       } catch (err) {
         console.error(
@@ -162,6 +193,78 @@ function ProductDetails() {
       cancelled = true;
     };
   }, [productId]);
+
+  // ── EFFECT 2: Fetch Oxylabs reviews (GET /product-reviews) ─────────────
+  // Fires independently as soon as a product_link is available.
+  // Never blocks or touches the product-details state.
+  useEffect(() => {
+    // We need a product link from either location.state or the POST response.
+    const link =
+      productLinkRef.current ||
+      initialProduct?.product_link ||
+      null;
+
+    if (!link || reviewsFetched) return;
+
+    const lower = link.toLowerCase();
+    const isSupportedRetailer =
+      lower.includes("flipkart.com") || lower.includes("amazon.in");
+
+    if (!isSupportedRetailer) return;
+
+    let cancelled = false;
+
+    const loadReviews = async () => {
+      setReviewsLoading(true);
+      setReviewsError("");
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 32_000); // 32 s hard-abort
+
+      try {
+        const encoded = encodeURIComponent(link);
+        const resp = await fetch(
+          `${API_URL}/product-reviews?url=${encoded}`,
+          { signal: controller.signal }
+        );
+
+        clearTimeout(timeoutId);
+
+        const data = resp.ok ? await resp.json() : null;
+
+        if (!cancelled) {
+          if (data?.success && Array.isArray(data.reviews) && data.reviews.length > 0) {
+            setOxylabsReviews(data.reviews);
+          } else {
+            setReviewsError(
+              data?.error || "No customer reviews found for this product."
+            );
+          }
+          setReviewsFetched(true);
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (!cancelled) {
+          if (err.name === "AbortError") {
+            setReviewsError("Reviews request timed out.");
+          } else {
+            setReviewsError("Could not load reviews.");
+          }
+          setReviewsFetched(true);
+        }
+      } finally {
+        if (!cancelled) setReviewsLoading(false);
+      }
+    };
+
+    loadReviews();
+
+    return () => {
+      cancelled = true;
+    };
+    // Re-fire when the product link becomes available after the POST resolves
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.product_link, initialProduct?.product_link]);
 
   const image =
     product?.thumbnail ||
@@ -486,24 +589,46 @@ function ProductDetails() {
         )}
 
         {/* =====================================================
-            CUSTOMER REVIEWS
+            CUSTOMER REVIEWS  (Oxylabs — fires independently)
         ===================================================== */}
 
-        {(customerReviews.length > 0 ||
-          reviewStyleTakeaways.length > 0) && (
+        {/* ── Skeleton while Oxylabs is fetching ─── */}
+        {reviewsLoading && (
+          <section className="mt-6 rounded-3xl border border-white/[0.07] bg-[#111111] p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <MessageSquare size={18} className="text-[#D4AF37]" />
+              <h2 className="text-xl font-semibold text-[#F0EBE2]">
+                What People Are Saying
+              </h2>
+              <Loader2
+                size={15}
+                className="ml-auto animate-spin text-[#D4AF37] flex-none"
+              />
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <ReviewSkeleton />
+              <ReviewSkeleton />
+              <ReviewSkeleton />
+              <ReviewSkeleton />
+            </div>
+          </section>
+        )}
+
+        {/* ── Oxylabs reviews loaded successfully ─── */}
+        {!reviewsLoading && oxylabsReviews.length > 0 && (
           <section className="mt-6 rounded-3xl border border-white/[0.07] bg-[#111111] p-6 sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-[#F0EBE2]">
-                  What People Are Saying
-                </h2>
+                <div className="flex items-center gap-2">
+                  <MessageSquare size={16} className="text-[#D4AF37]" />
+                  <h2 className="text-xl font-semibold text-[#F0EBE2]">
+                    What People Are Saying
+                  </h2>
+                </div>
                 <p className="mt-1 text-[11px] text-[#6F6A62]">
-                  {customerReviews.length > 0
-                    ? "Customer review excerpts"
-                    : "AI-generated review-style previews based on the available product information"}
+                  Customer reviews fetched live from the retailer
                 </p>
               </div>
-
               <Star
                 size={18}
                 fill="#D4AF37"
@@ -512,80 +637,153 @@ function ProductDetails() {
               />
             </div>
 
-            {customerReviews.length > 0 ? (
-              <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                {customerReviews.map((review, index) => (
-                  <div
-                    key={`${review?.author || "review"}-${index}`}
-                    className="rounded-2xl border border-white/[0.05] bg-[#181818] p-5"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        {review?.rating !== null &&
-                        review?.rating !== undefined &&
-                        review?.rating !== "" ? (
-                          <div className="flex items-center gap-1 text-xs text-[#E4DDCF]">
-                            <Star
-                              size={13}
-                              fill="#D4AF37"
-                              color="#D4AF37"
-                            />
-                            {review.rating}
-                          </div>
-                        ) : null}
-
-                        {review?.date && (
-                          <span className="text-[10px] text-[#67635C]">
-                            {review.date}
-                          </span>
-                        )}
-                      </div>
-
-                      {review?.verified === true && (
-                        <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8D897F]">
-                          Verified
-                        </span>
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              {oxylabsReviews.map((review, index) => (
+                <div
+                  key={`oxylabs-${index}`}
+                  className="rounded-2xl border border-white/[0.05] bg-[#181818] p-5"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      {review?.rating != null && (
+                        <div className="flex items-center gap-1 text-xs text-[#E4DDCF]">
+                          <Star
+                            size={13}
+                            fill="#D4AF37"
+                            color="#D4AF37"
+                          />
+                          {Number(review.rating).toFixed(1)}
+                        </div>
                       )}
                     </div>
-
-                    {review?.title && (
-                      <p className="mt-3 text-sm font-semibold text-[#DED8CD]">
-                        {review.title}
-                      </p>
-                    )}
-
-                    <p className="mt-3 text-sm leading-6 text-[#AAA59C]">
-                      {review?.text || "No review text available."}
-                    </p>
-
-                    {review?.author && (
-                      <p className="mt-4 text-[10px] uppercase tracking-[0.1em] text-[#69655E]">
-                        — {review.author}
-                      </p>
-                    )}
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8D897F]">
+                      Verified
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-6 grid gap-4 lg:grid-cols-3">
-                {reviewStyleTakeaways.map((review, index) => (
-                  <div
-                    key={`${review}-${index}`}
-                    className="rounded-2xl border border-[#D4AF37]/10 bg-[#181818] p-5"
-                  >
-                    <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.11em] text-[#D4AF37]">
-                      <Sparkles size={12} />
-                      Review-style takeaway
-                    </div>
 
-                    <p className="mt-4 text-sm leading-6 text-[#AAA59C]">
-                      {review}
+                  <p className="mt-3 text-sm leading-6 text-[#AAA59C]">
+                    {review?.text || "No review text available."}
+                  </p>
+
+                  {review?.author && (
+                    <p className="mt-4 text-[10px] uppercase tracking-[0.1em] text-[#69655E]">
+                      — {review.author}
                     </p>
-                  </div>
-                ))}
-              </div>
-            )}
+                  )}
+                </div>
+              ))}
+            </div>
           </section>
+        )}
+
+        {/* ── Fallback: AI-style takeaways OR empty state if Oxylabs returned nothing ─── */}
+        {!reviewsLoading && oxylabsReviews.length === 0 && (
+          <>
+            {(customerReviews.length > 0 || reviewStyleTakeaways.length > 0) && (
+              <section className="mt-6 rounded-3xl border border-white/[0.07] bg-[#111111] p-6 sm:p-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-semibold text-[#F0EBE2]">
+                      What People Are Saying
+                    </h2>
+                    <p className="mt-1 text-[11px] text-[#6F6A62]">
+                      {customerReviews.length > 0
+                        ? "Customer review excerpts"
+                        : "AI-generated review-style previews based on the available product information"}
+                    </p>
+                  </div>
+                  <Star
+                    size={18}
+                    fill="#D4AF37"
+                    color="#D4AF37"
+                    className="mt-1 flex-none"
+                  />
+                </div>
+
+                {customerReviews.length > 0 ? (
+                  <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                    {customerReviews.map((review, index) => (
+                      <div
+                        key={`${review?.author || "review"}-${index}`}
+                        className="rounded-2xl border border-white/[0.05] bg-[#181818] p-5"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            {review?.rating != null &&
+                            review?.rating !== "" ? (
+                              <div className="flex items-center gap-1 text-xs text-[#E4DDCF]">
+                                <Star
+                                  size={13}
+                                  fill="#D4AF37"
+                                  color="#D4AF37"
+                                />
+                                {review.rating}
+                              </div>
+                            ) : null}
+                            {review?.date && (
+                              <span className="text-[10px] text-[#67635C]">
+                                {review.date}
+                              </span>
+                            )}
+                          </div>
+                          {review?.verified === true && (
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-[#8D897F]">
+                              Verified
+                            </span>
+                          )}
+                        </div>
+                        {review?.title && (
+                          <p className="mt-3 text-sm font-semibold text-[#DED8CD]">
+                            {review.title}
+                          </p>
+                        )}
+                        <p className="mt-3 text-sm leading-6 text-[#AAA59C]">
+                          {review?.text || "No review text available."}
+                        </p>
+                        {review?.author && (
+                          <p className="mt-4 text-[10px] uppercase tracking-[0.1em] text-[#69655E]">
+                            — {review.author}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-6 grid gap-4 lg:grid-cols-3">
+                    {reviewStyleTakeaways.map((review, index) => (
+                      <div
+                        key={`${review}-${index}`}
+                        className="rounded-2xl border border-[#D4AF37]/10 bg-[#181818] p-5"
+                      >
+                        <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.11em] text-[#D4AF37]">
+                          <Sparkles size={12} />
+                          Review-style takeaway
+                        </div>
+                        <p className="mt-4 text-sm leading-6 text-[#AAA59C]">
+                          {review}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Graceful empty state when Oxylabs returned nothing AND no fallbacks */}
+            {reviewsFetched &&
+              reviewsError &&
+              customerReviews.length === 0 &&
+              reviewStyleTakeaways.length === 0 && (
+                <section className="mt-6 rounded-3xl border border-white/[0.05] bg-[#0E0E0E] p-6 sm:p-8">
+                  <div className="flex items-center gap-3 text-[#4A4740]">
+                    <MessageSquare size={16} />
+                    <p className="text-sm">
+                      No customer reviews were found for this product.
+                    </p>
+                  </div>
+                </section>
+              )}
+          </>
         )}
 
         {/* =====================================================

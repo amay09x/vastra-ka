@@ -154,3 +154,8 @@ venv/
 # Temporary API test responses
 serper_resolved_products.json
 serper_response.json
+
+# Local Databases
+*.db
+*.sqlite
+*.sqlite3

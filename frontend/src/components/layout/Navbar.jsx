@@ -10,9 +10,11 @@ import {
 
 import { NAV_LINKS } from "../../constants/navigation";
 import Logo from "../common/Logo";
+import { useAuth } from "../../context/AuthContext";
 
 function Navbar() {
   const navigate = useNavigate();
+  const { user, logOut } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -54,13 +56,19 @@ function Navbar() {
     },
   ];
 
-  const handleProfileClick = (item) => {
+  const handleProfileClick = async (item) => {
     setProfileOpen(false);
 
     if (item.path) {
       navigate(item.path);
     } else {
-      alert("Logout will be connected after authentication.");
+      // Logout — calls Firebase signOut then redirects to /auth
+      try {
+        await logOut();
+        navigate("/auth");
+      } catch {
+        // Silently fail; user stays logged in
+      }
     }
   };
 
@@ -220,7 +228,7 @@ function Navbar() {
                   transition
                 "
               >
-                K
+                {user?.email?.[0]?.toUpperCase() ?? "V"}
               </div>
 
               <ChevronDown
@@ -257,7 +265,7 @@ function Navbar() {
                 <div className="px-5 py-4 border-b border-white/10">
 
                   <p className="text-sm font-medium text-white">
-                    Kumar Shailendra
+                    {user?.displayName || user?.email || "VASTRA User"}
                   </p>
 
                   <p className="text-xs text-white/40 mt-1">
