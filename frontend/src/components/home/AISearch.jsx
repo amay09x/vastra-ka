@@ -8,6 +8,7 @@ import {
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { API_URL } from "../../assets/services/api";
 
 function AISearch({ onSearch }) {
   const imageInputRef = useRef(null);
@@ -40,7 +41,7 @@ function AISearch({ onSearch }) {
     console.log("VASTRA: searching image...", file.name);
 
     const response = await fetch(
-      "http://127.0.0.1:8000/image-search",
+      `${API_URL}/image-search`,
       {
         method: "POST",
         body: formData,

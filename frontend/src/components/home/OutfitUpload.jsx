@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Upload, Image, Sparkles, X } from "lucide-react";
+import { API_URL } from "../../assets/services/api";
 
 export default function OutfitUpload({
   onImageSelect,
@@ -52,7 +53,7 @@ export default function OutfitUpload({
       formData.append("file", selectedFile);
 
       const response = await fetch(
-        "http://127.0.0.1:8000/outfit-analysis",
+        `${API_URL}/outfit-analysis`,
         {
           method: "POST",
           body: formData,

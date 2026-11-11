@@ -1,0 +1,40 @@
+name: Deploy Backend to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend-azure.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Azure Web App secrets
+        id: check_secrets
+        env:
+          APP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
+          PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        run: |
+          if [ -z "$APP_NAME" ] || [ -z "$PUBLISH_PROFILE" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Azure secrets (AZURE_WEBAPP_NAME / AZURE_WEBAPP_PUBLISH_PROFILE) are not set yet. Skipping deploy."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repository
+        if: steps.check_secrets.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Deploy backend to Azure Web App
+        if: steps.check_secrets.outputs.ready == 'true'
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./backend

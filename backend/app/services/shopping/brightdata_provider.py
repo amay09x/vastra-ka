@@ -1,10 +1,11 @@
+import hashlib
 import os
 
 import re
 
 import time
 
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 
 
@@ -113,7 +114,7 @@ class BrightDataProvider(ShoppingProvider):
         google_url = (
             "https://www.google.com/search?"
             f"q={quote(query)}"
-            "&tbm=shop"
+            "&udm=28"
             "&gl=in"
             "&hl=en"
             "&brd_json=1"
@@ -638,6 +639,28 @@ class BrightDataProvider(ShoppingProvider):
 
 
 
+    @staticmethod
+    def _extract_product_id(item, shopping_link, title, source):
+        """Extract a stable product ID from item fields, Google Shopping URL, or a hash fallback."""
+        direct_id = (
+            item.get("productid")
+            or item.get("product_id")
+            or item.get("productId")
+            or item.get("cid")
+        )
+        if direct_id is not None and str(direct_id).strip():
+            return str(direct_id).strip()
+
+        if shopping_link:
+            decoded_link = unquote(str(shopping_link))
+            for pattern in (r"productid:([^,&]+)", r"gpcid:([^,&]+)", r"cid=([^,&]+)"):
+                match = re.search(pattern, decoded_link)
+                if match:
+                    return match.group(1).strip()
+
+        raw_key = f"{title or ''}|{source or ''}|{shopping_link or ''}".encode("utf-8")
+        return f"bd_{hashlib.md5(raw_key).hexdigest()[:16]}"
+
     # =========================================================
 
     # NORMALIZE PRODUCT
@@ -680,15 +703,23 @@ class BrightDataProvider(ShoppingProvider):
 
 
 
-        product_id = (
+        shopping_link = (
 
-            item.get("productid")
+            item.get("link")
 
-            or item.get("product_id")
+            or item.get("url")
 
-            or item.get("productId")
+        )
 
-            or item.get("cid")
+        product_id = self._extract_product_id(
+
+            item,
+
+            shopping_link,
+
+            title,
+
+            source,
 
         )
 
@@ -757,26 +788,11 @@ class BrightDataProvider(ShoppingProvider):
 
 
         # Bright Data Google Shopping gives
-
         # a Google Shopping product URL here.
-
         #
-
         # IMPORTANT:
-
         # This is NOT treated as the retailer
-
         # product URL.
-
-        shopping_link = (
-
-            item.get("link")
-
-            or item.get("url")
-
-        )
-
-
 
         return Product(
 

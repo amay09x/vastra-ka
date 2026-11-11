@@ -46,7 +46,17 @@ function ResultCard({ product, userRequest = "" }) {
     product?.brand ||
     "";
 
-  const productId = product?.product_id;
+  const productId =
+    product?.product_id ||
+    product?.id ||
+    (name
+      ? encodeURIComponent(
+          `${name}-${store || "vastra"}`
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .slice(0, 64)
+        )
+      : null);
 
   // ============================================================
   // PRICE HELPER

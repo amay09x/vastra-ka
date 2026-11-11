@@ -15,7 +15,7 @@ load_dotenv()
 
 class SearchService:
 
-    MAX_RESULTS = 16
+    MAX_RESULTS = 40
 
     def __init__(self):
 
@@ -35,14 +35,24 @@ class SearchService:
         if provider_name == "brightdata":
 
             self.provider = BrightDataProvider()
+            self.fallback_provider = (
+                SerperProvider()
+                if os.getenv("SERPER_KEY")
+                else None
+            )
 
         # =====================================================
-        # OPTIONAL FUTURE PROVIDER
+        # SERPER PROVIDER
         # =====================================================
 
         elif provider_name == "serper":
 
             self.provider = SerperProvider()
+            self.fallback_provider = (
+                BrightDataProvider()
+                if os.getenv("BRIGHTDATA_API_KEY")
+                else None
+            )
 
         else:
 
@@ -84,6 +94,8 @@ class SearchService:
             f"\n{query}"
         )
 
+        products = []
+
         try:
 
             products = (
@@ -99,7 +111,21 @@ class SearchService:
                 f"{type(exc).__name__}: {exc}"
             )
 
-            return []
+        if not products and self.fallback_provider is not None:
+
+            print(
+                "⚠️ Primary provider returned no products; "
+                "retrying with fallback provider."
+            )
+
+            try:
+                products = self.fallback_provider.search_products(query)
+            except Exception as exc:
+                print(
+                    "❌ Fallback provider error: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+                return []
 
         if not products:
 
