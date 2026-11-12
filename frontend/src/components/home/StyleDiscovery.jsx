@@ -140,7 +140,7 @@ function StyleDiscovery() {
 >
       <div className="relative h-full w-full overflow-hidden bg-black">
        <img
-  src="/images/styles/minimal.jpg"
+  src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600&auto=format&fit=crop"
   alt="Minimal style"
   className="
     h-full
@@ -192,7 +192,7 @@ onClick={() => {
 >
       <div className="relative h-full w-full overflow-hidden bg-black">
         <img
-          src="/images/styles/casual.jpg"
+          src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&auto=format&fit=crop"
           alt="Casual style"
           className="
   h-full
@@ -247,7 +247,7 @@ onClick={() => {
 >
       <div className="relative h-full w-full overflow-hidden bg-black">
         <img
-          src="/images/styles/street.jpg"
+          src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop"
           alt="Street style"
           className="
   h-full
@@ -297,7 +297,7 @@ onClick={() => {
 >
       <div className="relative h-full w-full overflow-hidden bg-black">
         <img
-          src="/images/styles/party.jpg"
+          src="https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=600&auto=format&fit=crop"
           alt="Party wear style"
           className="
   h-full

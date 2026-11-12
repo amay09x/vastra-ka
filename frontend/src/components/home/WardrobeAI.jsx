@@ -353,7 +353,7 @@ function WardrobeAI() {
     <div className="relative min-h-[230px] overflow-hidden bg-[#111]">
 
       <img
-        src="/images/wardrobe/find-similar.jpg"
+        src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop"
         alt="Find similar clothing"
         className="
           absolute
@@ -424,7 +424,7 @@ function WardrobeAI() {
     <div className="relative min-h-[230px] overflow-hidden bg-[#111]">
 
       <img
-        src="/images/wardrobe/build-outfits.jpg"
+        src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop"
         alt="Build outfits from your wardrobe"
         className="
           absolute
@@ -495,7 +495,7 @@ function WardrobeAI() {
     <div className="relative min-h-[230px] overflow-hidden bg-[#111]">
 
       <img
-        src="/images/wardrobe/rate-look.jpg"
+        src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&auto=format&fit=crop"
         alt="Rate an outfit"
         className="
           absolute
@@ -566,7 +566,7 @@ function WardrobeAI() {
     <div className="relative min-h-[230px] overflow-hidden bg-[#111]">
 
       <img
-        src="/images/wardrobe/style-me.jpg"
+        src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600&auto=format&fit=crop"
         alt="VASTRA style recommendations"
         className="
           absolute

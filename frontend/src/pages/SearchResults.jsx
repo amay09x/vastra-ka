@@ -70,7 +70,7 @@ function SearchResults() {
       name: "Minimal",
       subtitle:
         "Clean, refined looks with nothing unnecessary.",
-      image: "/images/styles/minimal.jpg",
+      image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600&auto=format&fit=crop",
       items: [
         "Clean-cut top",
         "Neutral trousers",
@@ -84,7 +84,7 @@ function SearchResults() {
       name: "Casual",
       subtitle:
         "Relaxed pieces for effortless everyday style.",
-      image: "/images/styles/casual.jpg",
+      image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&auto=format&fit=crop",
       items: [
         "Relaxed shirt",
         "Comfortable trousers",
@@ -98,7 +98,7 @@ function SearchResults() {
       name: "Street",
       subtitle:
         "Expressive layers with a modern edge.",
-      image: "/images/styles/street.jpg",
+      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop",
       items: [
         "Statement top",
         "Relaxed-fit trousers",
@@ -112,7 +112,7 @@ function SearchResults() {
       name: "Party Wear",
       subtitle:
         "Made to stand out when the night begins.",
-      image: "/images/styles/party.jpg",
+      image: "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=600&auto=format&fit=crop",
       items: [
         "Statement shirt",
         "Tailored trousers",
@@ -127,7 +127,7 @@ function SearchResults() {
       subtitle:
         "A look made to stand out tonight.",
       image:
-        "/images/stylist/partywear.jpg",
+        "https://images.unsplash.com/photo-1566479179820-cb9d64f5d0a0?w=600&auto=format&fit=crop",
       items: [
         "Wine-red shirt",
         "Black tailored trousers",
@@ -142,7 +142,7 @@ function SearchResults() {
       subtitle:
         "Effortless style for your day.",
       image:
-        "/images/stylist/everyday.jpg",
+        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop",
       items: [
         "Black polo",
         "Beige trousers",
@@ -157,7 +157,7 @@ function SearchResults() {
       subtitle:
         "Comfortable, clean and campus-ready.",
       image:
-        "/images/stylist/college.jpg",
+        "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600&auto=format&fit=crop",
       items: [
         "Black shirt",
         "White trousers",
@@ -172,7 +172,7 @@ function SearchResults() {
       subtitle:
         "A look built around what you already own.",
       image:
-        "/images/stylist/closet.jpg",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop",
       items: [
         "Your existing pieces",
         "Matched colors",
@@ -1241,7 +1241,7 @@ The user wants products inspired by this look, NOT products with the exact same 
       subtitle:
         "A look curated by VASTRA.",
       image:
-        "/images/stylist/everyday.jpg",
+        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop",
       items: [
         "Top",
         "Bottom",

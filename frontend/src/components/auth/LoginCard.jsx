@@ -138,6 +138,24 @@ function LoginCard() {
       {/* ── Card content ── */}
       <div className="relative z-10">
 
+        {/* ── Coming Soon badge ── */}
+        <div className="flex justify-center mb-6">
+          <span
+            className="
+              inline-flex items-center gap-1.5
+              px-4 py-1.5
+              rounded-full
+              border border-[#D4AF37]/40
+              bg-[#D4AF37]/10
+              text-[#D4AF37] text-xs font-semibold tracking-widest uppercase
+              shadow-[0_0_18px_rgba(212,175,55,0.15)]
+            "
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+            Coming Soon
+          </span>
+        </div>
+
         {/* Title */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -152,20 +170,21 @@ function LoginCard() {
             </h2>
             <p className="text-white/60 mt-2 mb-8">
               {mode === "login"
-                ? "Continue your luxury shopping journey."
-                : "Join VASTRA and elevate your style."}
+                ? "Authentication is launching soon — stay tuned."
+                : "Account creation is launching soon — stay tuned."}
             </p>
           </motion.div>
         </AnimatePresence>
 
-        {/* Google button (UI-only — wire later) */}
+        {/* Google button — disabled until auth launches */}
         <button
           type="button"
           disabled
+          title="Authentication coming soon"
           className="
             w-full h-14 rounded-xl bg-white
             flex items-center justify-center gap-3
-            font-medium opacity-60 cursor-not-allowed
+            font-medium opacity-40 cursor-not-allowed select-none
           "
         >
           <FcGoogle size={22} />
@@ -190,13 +209,12 @@ function LoginCard() {
             onChange={(e) => { setEmail(e.target.value); setError(""); }}
             autoComplete="email"
             required
+            disabled
             className="
               w-full h-14 rounded-xl
               bg-[#111] border border-white/10
               px-5 text-white outline-none mb-4
-              transition
-              focus:border-[#D4AF37]/50
-              focus:shadow-[0_0_20px_rgba(212,175,55,0.08)]
+              transition opacity-50 cursor-not-allowed
             "
           />
 
@@ -209,13 +227,12 @@ function LoginCard() {
               onChange={(e) => { setPassword(e.target.value); setError(""); }}
               autoComplete={mode === "login" ? "current-password" : "new-password"}
               required
+              disabled
               className="
                 w-full h-14 rounded-xl
                 bg-[#111] border border-white/10
                 px-5 pr-12 text-white outline-none
-                transition
-                focus:border-[#D4AF37]/50
-                focus:shadow-[0_0_20px_rgba(212,175,55,0.08)]
+                transition opacity-50 cursor-not-allowed
               "
             />
             <button
@@ -252,25 +269,16 @@ function LoginCard() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
+            disabled
+            title="Authentication coming soon"
             className="
               w-full h-14 mt-2 rounded-xl
               bg-[#D4AF37] text-black font-semibold
               flex items-center justify-center gap-2
-              hover:scale-[1.02]
-              hover:shadow-[0_0_25px_rgba(212,175,55,0.18)]
-              transition disabled:opacity-70 disabled:cursor-not-allowed
-              disabled:hover:scale-100
+              opacity-50 cursor-not-allowed select-none
             "
           >
-            {loading ? (
-              <>
-                <Loader2 size={17} className="animate-spin" />
-                {mode === "login" ? "Signing in…" : "Creating account…"}
-              </>
-            ) : (
-              mode === "login" ? "Enter VASTRA" : "Create Account"
-            )}
+            {mode === "login" ? "Enter VASTRA" : "Create Account"}
           </button>
 
         </form>

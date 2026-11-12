@@ -64,9 +64,15 @@ export function AuthProvider({ children }) {
 
   // ── Context value ─────────────────────────────────────────
 
+  // ── Derived guest-safe display name ───────────────────────
+  const displayName = user?.displayName || user?.email || "Guest";
+  const isGuest     = !user;
+
   const value = {
-    user,       // Firebase User | null
-    loading,    // true until initial auth state is known
+    user,         // Firebase User | null
+    displayName,  // Always a safe string — "Guest" for unauthenticated visitors
+    isGuest,      // true when no user is signed in
+    loading,      // true until initial auth state is known
     signUp,
     logIn,
     logOut,
